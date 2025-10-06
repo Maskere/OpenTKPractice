@@ -28,6 +28,7 @@ namespace Practice {
         public Camera(Vector3 position, float aspectRatio) {
             Position = position;
             AspectRatio = aspectRatio;
+            _fov = 45;
         }
 
         // The position of the camera
