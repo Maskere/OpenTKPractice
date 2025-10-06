@@ -19,17 +19,29 @@ namespace Practice{
         }
 
         public void Draw(Shader shader){
+            int diffuseNr = 0;
+            int specularNr = 0;
+
             for(int i = 0; i < Textures.Count; i++){
                 GL.ActiveTexture(TextureUnit.Texture0 + i);
-                GL.BindTexture(TextureTarget.Texture2D, Textures[i].Handle);
-                shader.SetInt(Textures[i].Type + i, i);
-            }
 
+                string? number = "";
+                string? name = Textures[i].Type;
+
+                if(name == "texture_diffuse"){
+                    number = diffuseNr++.ToString();
+                }
+                else if(name == "texture_specular"){
+                    number = specularNr++.ToString();
+                }
+
+                GL.BindTexture(TextureTarget.Texture2D, Textures[i].Handle);
+                shader.SetInt($"{name}{number}",i);
+            }
+            GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindVertexArray(VertexArrayObject);
             GL.DrawElements(PrimitiveType.Triangles, Indices.Count, DrawElementsType.UnsignedInt, 0);
             GL.BindVertexArray(0);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
         }
 
         private void SetupMesh(){

@@ -73,13 +73,28 @@ namespace Practice{
         }
 
         public void SetInt(string name, int data){
+            if(!uniformLocation.TryGetValue(name, out int location)){
+                location = GL.GetUniformLocation(Handle,name);
+                if(location == -1){
+                    return;
+                }
+
+                uniformLocation[name] = location;
+            }
             GL.UseProgram(Handle);
-            GL.Uniform1(uniformLocation[name],data);
+            GL.Uniform1(location,data);
         }
 
         public void SetFloat(string name, float data){
+            if(!uniformLocation.TryGetValue(name, out int location)){
+                location = GL.GetUniformLocation(Handle,name);
+                if(location == -1) return;
+
+                uniformLocation[name] = location;
+            }
+
             GL.UseProgram(Handle);
-            GL.Uniform1(uniformLocation[name],data);
+            GL.Uniform1(location,data);
         }
 
         public void SetMatrix4(string name, Matrix4 data){

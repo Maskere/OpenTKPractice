@@ -10,7 +10,7 @@ namespace Practice{
     public class Window : GameWindow{
         private Stopwatch sw = new();
         private readonly string waveObj = "./Resources/CubeWave.obj";
-        private readonly string waveObj1 = "./Resources/CubeWave.obj";
+        private readonly string waveObj1 = "./Resources/Suzanne.obj";
         private static readonly string? textureFile = "./Resources/container.png";
         private MeshDataExtractor extracter = new();
         private List<string> objects = new();
@@ -22,7 +22,6 @@ namespace Practice{
 
         private Vector3 position = Vector3.Zero;
         private Vector3 position2 = Vector3.Zero;
-        private Texture? texture;
         private Vector2 lastPos;
         private Camera? camera;
         private Shader? shader;
@@ -30,12 +29,7 @@ namespace Practice{
         private float startTime;
         private float Time;
         private bool firstMove = true;
-        private int VertexBufferObject;
         private int VertexArrayObject;
-        private int ElementBufferObject;
-        private int totalIndexCount;
-        private int waveObjIndexCount;
-        Vector3 move = new();
 
         private List<int> indexCount = new();
         private List<Mesh> meshes = new();
@@ -86,8 +80,6 @@ namespace Practice{
             GL.BindVertexArray(VertexArrayObject);
 
             if(shader == null) throw new NullReferenceException("Shader not found");
-            // if(texture == null) throw new ArgumentNullException("Texture class not found");
-            // texture.Use(TextureUnit.Texture0);
             shader.Use();
 
             shader.SetMatrix4("view",camera.GetViewMatrix());
@@ -100,18 +92,6 @@ namespace Practice{
             Matrix4 model2 = Matrix4.CreateTranslation(1.5f,0,0);
             shader.SetMatrix4("model", model2);
             meshes[1].Draw(shader);
-
-            // move = new(0,-2,0);
-            // model =
-            //     Matrix4.Identity *
-            //     Matrix4.CreateScale(0.5f) *
-            //     Matrix4.CreateRotationX(0) *
-            //     Matrix4.CreateRotationY(0) *
-            //     Matrix4.CreateRotationZ(0) *
-            //     Matrix4.CreateTranslation(move);
-
-            // shader.SetMatrix4("model", model2);
-            GL.DrawElements(PrimitiveType.Triangles, indicesToRender.Count, DrawElementsType.UnsignedInt, 0);
 
             SwapBuffers();
         }
@@ -147,14 +127,6 @@ namespace Practice{
             if (input.IsKeyDown(Keys.D)) {
                 camera.Position += right * movementSpeed * (float)e.Time; // Right
             }
-            // if (input.IsKeyDown(Keys.Space)) {
-            //     // moveY += movementSpeed * (float)e.Time;
-            //     camera.Position += camera.Up * movementSpeed * (float)e.Time; // Up
-            // }
-            // if (input.IsKeyDown(Keys.LeftShift)) {
-            //     // moveY -= movementSpeed * (float)e.Time;
-            //     camera.Position -= camera.Up * movementSpeed * (float)e.Time; // Down
-            // }
 
             MouseState mouse = MouseState;
 
@@ -180,8 +152,6 @@ namespace Practice{
         protected override void OnMouseWheel(MouseWheelEventArgs e) {
             base.OnMouseWheel(e);
             if(camera == null) throw new Exception("Camera not found");
-
-            // camera.Fov -= e.OffsetY;
         }
 
         protected override void OnResize(ResizeEventArgs e) {
@@ -189,7 +159,6 @@ namespace Practice{
             if(camera == null) throw new Exception("Camera not found");
 
             GL.Viewport(0,0,Size.X,Size.Y);
-
             camera.AspectRatio = Size.X / (float)Size.Y;
         }
     }
