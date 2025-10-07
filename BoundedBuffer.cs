@@ -5,8 +5,6 @@ namespace Practice{
         private readonly Semaphore full;
         private readonly object lockObj;
 
-        private int inQueue;
-
         public BoundedBuffer(int queueSize){
             queue = new(queueSize);
             empty = new(0,queueSize);
@@ -17,7 +15,6 @@ namespace Practice{
         public T Insert(T item){
             full.WaitOne();
             lock(lockObj){
-                inQueue++;
                 queue.Enqueue(item);
             }
             empty.Release();
@@ -28,7 +25,6 @@ namespace Practice{
             empty.WaitOne();
             T result;
             lock(lockObj){
-                inQueue--;
                 result = queue.Dequeue();
             }
             full.Release();
@@ -36,7 +32,9 @@ namespace Practice{
         }
 
         public int GetInQueue(){
-            return inQueue;
+            lock(lockObj){
+                return queue.Count;
+            }
         }
     }
 }

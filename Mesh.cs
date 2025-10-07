@@ -1,3 +1,4 @@
+using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
 namespace Practice{
@@ -38,10 +39,11 @@ namespace Practice{
                 GL.BindTexture(TextureTarget.Texture2D, Textures[i].Handle);
                 shader.SetInt($"{name}{number}",i);
             }
-            GL.ActiveTexture(TextureUnit.Texture0);
+
             GL.BindVertexArray(VertexArrayObject);
             GL.DrawElements(PrimitiveType.Triangles, Indices.Count, DrawElementsType.UnsignedInt, 0);
             GL.BindVertexArray(0);
+            GL.ActiveTexture(TextureUnit.Texture0);
         }
 
         private void SetupMesh(){
@@ -58,7 +60,7 @@ namespace Practice{
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferObject);
             GL.BufferData(BufferTarget.ElementArrayBuffer, Indices.Count * sizeof(uint), Indices.ToArray(), BufferUsageHint.StaticDraw);
 
-            int stride = (3+3+2) * sizeof(float);
+            int stride = (3 + 3 + 2) * sizeof(float);
 
             GL.EnableVertexAttribArray(0);
             GL.VertexAttribPointer(0,3,VertexAttribPointerType.Float, false, stride, 0);

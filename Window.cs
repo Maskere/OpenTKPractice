@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -8,10 +7,11 @@ using MeshDataExtract;
 
 namespace Practice{
     public class Window : GameWindow{
-        private Stopwatch sw = new();
+        private BoundedBuffer<Mesh> meshBuffer = new(10);
         private readonly string waveObj = "./Resources/CubeWave.obj";
-        private readonly string waveObj1 = "./Resources/Suzanne.obj";
-        private static readonly string? textureFile = "./Resources/container.png";
+        private readonly string waveObj1 = "./Resources/Rock.obj";
+        private static readonly string? woodenWall = "./Resources/Textures/container.png";
+        private static readonly string? rockTex = "./Resources/Textures/Rock030_4K-JPG_Color.jpg";
         private MeshDataExtractor extracter = new();
         private List<string> objects = new();
         private List<float> verticesToRender = new();
@@ -29,10 +29,9 @@ namespace Practice{
         private float startTime;
         private float Time;
         private bool firstMove = true;
-        private int VertexArrayObject;
 
         private List<int> indexCount = new();
-        private List<Mesh> meshes = new();
+        private List<Model> models = new();
 
         public Window(int width, int height, string title) : base(GameWindowSettings.Default, new NativeWindowSettings() {
                 ClientSize = (width,height), Title = title}){
@@ -41,29 +40,34 @@ namespace Practice{
 
         protected override void OnLoad(){
             base.OnLoad();
-            GL.ClearColor(0.2f,0.3f,0.3f,1);
+            // GL.ClearColor(0.2f,0.3f,0.3f,1);
+            GL.ClearColor(0.5f,0.5f,0.5f,1);
             GL.Enable(EnableCap.DepthTest);
 
             objects.Add(waveObj);
             objects.Add(waveObj1);
 
-            // const int standard_stride = 8;
             extracter.WavefrontObjDataExtractor(objects[0],out List<float> obj1V, out List<uint> obj1UV);
             extracter.WavefrontObjDataExtractor(objects[1],out List<float> obj2V, out List<uint> obj2UV);
 
             shader = new("Shader/shader.vert","Shader/shader.frag");
             shader.Use();
 
-            Texture texture1 = Texture.LoadFromFile(textureFile);
+            Texture texture1 = Texture.LoadFromFile(woodenWall);
             texture1.Type = "texture_diffuse";
             Mesh cube1 = new(obj1V,obj1UV, new List<Texture>{texture1});
 
-            Texture texture2 = Texture.LoadFromFile(textureFile);
+            Texture texture2 = Texture.LoadFromFile(rockTex);
             texture2.Type = "texture_diffuse";
             Mesh cube2 = new(obj2V,obj2UV, new List<Texture>{texture2});
 
-            meshes.Add(cube1);
-            meshes.Add(cube2);
+            meshBuffer.Insert(cube1);
+            meshBuffer.Insert(cube2);
+
+            Model cube = new Model(cube1, new Vector3(-2,0,0));
+            Model rock = new Model(cube2, new Vector3(2,0,0));
+            models.Add(cube);
+            models.Add(rock);
 
             camera = new (Vector3.UnitZ * 3, Size.X / (float)Size.Y);
             camera.Fov = 45;
@@ -77,21 +81,15 @@ namespace Practice{
             if(camera == null) throw new Exception("Camera not found");
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            GL.BindVertexArray(VertexArrayObject);
-
             if(shader == null) throw new NullReferenceException("Shader not found");
             shader.Use();
 
             shader.SetMatrix4("view",camera.GetViewMatrix());
             shader.SetMatrix4("projection",camera.GetProjectionMatrix());
 
-            Matrix4 model1 = Matrix4.CreateTranslation(-1.5f,0,0);
-            shader.SetMatrix4("model", model1);
-            meshes[0].Draw(shader);
-
-            Matrix4 model2 = Matrix4.CreateTranslation(1.5f,0,0);
-            shader.SetMatrix4("model", model2);
-            meshes[1].Draw(shader);
+            foreach(Model m in models){
+                m.Draw(shader);
+            }
 
             SwapBuffers();
         }
@@ -106,6 +104,7 @@ namespace Practice{
             if(input.IsKeyDown(Keys.Escape)){
                 Close();
             }
+
             const float movementSpeed = 2f;
             const float sensitivity = 0.2f;
 
@@ -126,6 +125,12 @@ namespace Practice{
             }
             if (input.IsKeyDown(Keys.D)) {
                 camera.Position += right * movementSpeed * (float)e.Time; // Right
+            }
+            if(input.IsKeyDown(Keys.Space)){
+                camera.Position += new Vector3(0,1,0) * movementSpeed * (float)e.Time; // Right
+            }
+            if(input.IsKeyDown(Keys.LeftControl)){
+                camera.Position += new Vector3(0,-1,0) * movementSpeed * (float)e.Time; // Right
             }
 
             MouseState mouse = MouseState;
